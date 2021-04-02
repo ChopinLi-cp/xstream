@@ -47,6 +47,17 @@ public class ElementIgnoringMapper extends MapperWrapper {
         } else if (definedIn == Object.class && isIgnoredElement(fieldName)) {
             return false;
         }
+        // Hack to ignore field of type CodeSource
+        try {
+            if (definedIn.getField(fieldName).getType().equals(java.security.CodeSource.class)) {
+                return false;
+            }
+            if (definedIn.getField(fieldName).getType().equals(sun.instrument.InstrumentationImpl.class)) {
+                return false;
+            }
+        } catch (NoSuchFieldException nsfe) {
+            // Ignore
+        }
         return super.shouldSerializeMember(definedIn, fieldName);
     }
 
