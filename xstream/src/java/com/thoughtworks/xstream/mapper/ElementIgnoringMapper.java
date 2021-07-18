@@ -79,11 +79,15 @@ public class ElementIgnoringMapper extends MapperWrapper {
                 System.out.println("IGNORING SunJCE: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
                 return false;
             }
-            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("java.lang.ClassLoader"))){
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("java.lang.ClassLoader"))) {
                 System.out.println("IGNORING ClassLoader: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
                 return false;
             }
-            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("java.security.SecureClassLoader"))){
+            if (Class.forName("java.lang.ClassLoader").isAssignableFrom(definedIn.getDeclaredField(fieldName).getType())) {
+                System.out.println("IGNORING ClassLoader subclass: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("java.security.SecureClassLoader"))) {
                 System.out.println("IGNORING SecureClassLoader: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
                 return false;
             }
@@ -91,7 +95,7 @@ public class ElementIgnoringMapper extends MapperWrapper {
                 System.out.println("IGNORING java.security.Provider: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
                 return false;
             }
-	        if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("javax.security.auth.Subject"))){
+	        if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("javax.security.auth.Subject"))) {
                 System.out.println("IGNORING auth.Subject: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
                 return false;
             }
