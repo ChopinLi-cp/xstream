@@ -36,6 +36,7 @@ public class CachingMapper extends MapperWrapper implements Caching {
 
     @Override
     public Class<?> realClass(final String elementName) {
+        System.out.println("CachingMapper elementName: " + elementName);
         final Object cached = realClassCache.get(elementName);
         if (cached != null) {
             if (cached instanceof Class) {

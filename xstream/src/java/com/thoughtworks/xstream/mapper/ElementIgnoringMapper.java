@@ -99,6 +99,66 @@ public class ElementIgnoringMapper extends MapperWrapper {
                 System.out.println("IGNORING auth.Subject: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
                 return false;
             }
+            /* if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("java.util.concurrent.locks.AbstractQueuedSynchronizer"))) {
+                System.out.println("IGNORING AbstractQueuedSynchronizer: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("[Ljava.lang.ThreadGroup;"))) {
+                System.out.println("IGNORING ThreadGroup: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("[Ljava.lang.Thread;"))) {
+                System.out.println("IGNORING Thread: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("java.util.concurrent.ScheduledFuture"))) {
+                System.out.println("IGNORING ScheduledFuture: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("java.util.concurrent.ScheduledExecutorService"))) {
+                System.out.println("IGNORING ScheduledExecutorService: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("org.apache.dubbo.remoting.Server"))) {
+                System.out.println("IGNORING Server: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            } */
+            /* if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("java.text.DateFormatSymbols"))) {
+                System.out.println("IGNORING DateFormatSymbols: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("org.apache.log4j.Logger"))) {
+                System.out.println("IGNORING Logger: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("java.util.Collections$SingletonSet"))) {
+                System.out.println("IGNORING java.util.Collections$SingletonSet: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("java.security.AccessControlContext"))) {
+                System.out.println("IGNORING AccessControlContext: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("[Lio.netty.util.concurrent.EventExecutor;"))) {
+                System.out.println("IGNORING EventExecutor: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("[Ljava.util.concurrent.RunnableScheduledFuture;"))) {
+                System.out.println("IGNORING RunnableScheduledFuture: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("[Ljava.nio.channels.SelectionKey;"))) {
+                System.out.println("IGNORING SelectionKey: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("java.lang.Class"))) {
+                System.out.println("IGNORING java.lang.Class: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("org.apache.dubbo.rpc.Protocol$Adaptive"))) {
+                System.out.println("IGNORING $Adaptive: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            } */
         } catch (Exception exception){
             // ignore
             System.out.println("EXCEPTION IN IGNORING:" + fieldName + " - " + exception);

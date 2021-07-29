@@ -11,7 +11,10 @@
  */
 package com.thoughtworks.xstream.core;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Iterator;
+import java.util.Map;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;
@@ -34,6 +37,8 @@ public class TreeUnmarshaller implements UnmarshallingContext {
     private final ConverterLookup converterLookup;
     private final Mapper mapper;
     private final FastStack<Class<?>> types = new FastStack<>(16);
+    private final FastStack<String> fieldNames = new FastStack<>(16);
+    private final FastStack<String> classNames = new FastStack<>(16);
     private DataHolder dataHolder;
     private final PrioritizedList<Runnable> validationList = new PrioritizedList<>();
 
@@ -67,8 +72,61 @@ public class TreeUnmarshaller implements UnmarshallingContext {
         return convert(parent, type, converter);
     }
 
+    /* public Object convertAnother0(final Object parent, Class<?> type, Converter converter, Field field) {
+        type = mapper.defaultImplementationOf(type);
+        if (converter == null) {
+            converter = converterLookup.lookupConverterForType(type);
+        } else {
+            if (!converter.canConvert(type)) {
+                final ConversionException e = new ConversionException("Explicitly selected converter cannot handle type");
+                e.add("item-type", type.getName());
+                e.add("converter-type", converter.getClass().getName());
+                throw e;
+            }
+        }
+        return convert0(parent, type, converter, field);
+    } */
+
     protected Object convert(final Object parent, final Class<?> type, final Converter converter) {
         types.push(type);
+        try {
+            String currentClass = System.getProperty("currentClassInXStream");
+            String currentField = System.getProperty("currentFieldInXStream");
+            System.out.println("CURRENT0: " + currentClass + " + " + currentField);
+            /*
+            Class clz = Class.forName(currentClass);
+            Field field = clz.getDeclaredField(currentField);
+            field.setAccessible(true);
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            Object cur = this.getRequiredObject();
+            System.out.println("FIELDNAME IN Tree: " + field.getName());
+            Object ob;
+            if(parent instanceof Map) {
+                ob = converter.unmarshal(reader, this);
+            }
+            else if (Modifier.isStatic(field.getModifiers())){
+                ob = field.getType().cast(field.get(null));
+            }
+            else {
+                ob = field.getType().cast(field.get(cur));
+            }
+            System.out.println("NEW OBJ" + ob.getClass());
+            */
+            if(parent instanceof Map) {
+                classNames.push("java.util.Map");
+                fieldNames.push("entry");
+            }
+            else{
+                classNames.push(currentClass);
+                fieldNames.push(currentField);
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+        System.out.println("TREEUNMARSHALLER + TPYE(NAME): " + type.getName());
+        // System.out.println("TREEUNMARSHALLER + OBJECT(CLASS): " + parent.getClass());
         try {
             return converter.unmarshal(reader, this);
         } catch (final ConversionException conversionException) {
@@ -80,8 +138,48 @@ public class TreeUnmarshaller implements UnmarshallingContext {
             throw conversionException;
         } finally {
             types.popSilently();
+            classNames.popSilently();
+            fieldNames.popSilently();
         }
     }
+
+    /* protected Object convert0(final Object parent, final Class<?> type, final Converter converter, final Field field) {
+        types.push(type);
+        try {
+            field.setAccessible(true);
+            Object cur = this.getRequiredObject();
+            System.out.println("CUR OBJ: " + cur.getClass());
+            System.out.println("FIELDNAME IN Tree: " + field.getName());
+            Object ob;
+            if (Modifier.isStatic(field.getModifiers())){
+                ob = field.get(null);
+            }
+            else {
+                ob = field.get(cur);
+            }
+            System.out.println("NEW OBJ" + ob.getClass());
+            objects.push(ob);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
+        }
+        System.out.println("TREEUNMARSHALLER + TPYE(NAME): " + type.getName());
+        // System.out.println("TREEUNMARSHALLER + OBJECT(CLASS): " + parent.getClass());
+        try {
+            return converter.unmarshal(reader, this);
+        } catch (final ConversionException conversionException) {
+            addInformationTo(conversionException, type, converter, parent);
+            throw conversionException;
+        } catch (final RuntimeException e) {
+            final ConversionException conversionException = new ConversionException(e);
+            addInformationTo(conversionException, type, converter, parent);
+            throw conversionException;
+        } finally {
+            types.popSilently();
+            // objects.popSilently();
+        }
+    } */
 
     private void addInformationTo(final ErrorWriter errorWriter, final Class<?> type, final Converter converter,
             final Object parent) {
@@ -107,9 +205,29 @@ public class TreeUnmarshaller implements UnmarshallingContext {
         return types.size() == 1 ? root : null;
     }
 
+    public FastStack<Class<?>> getTypes() {
+        return types;
+    }
+
+    public FastStack<String> getFieldNames() {
+        return fieldNames;
+    }
+
+    public FastStack<String> getClassNames() {
+        return classNames;
+    }
+
     @Override
     public Class<?> getRequiredType() {
         return types.peek();
+    }
+
+    public String getRequiredFieldName() {
+        return fieldNames.peek();
+    }
+
+    public String getRequiredClassName() {
+        return classNames.peek();
     }
 
     @Override
@@ -138,8 +256,12 @@ public class TreeUnmarshaller implements UnmarshallingContext {
 
     public Object start(final DataHolder dataHolder) {
         this.dataHolder = dataHolder;
+        String attr = HierarchicalStreams.readClassAttribute(reader, mapper);
+        System.out.println("TreeUnmarshal attributeName: " + attr);
         final Class<?> type = HierarchicalStreams.readClassType(reader, mapper);
+        // objects.push(this.root);
         final Object result = convertAnother(null, type);
+        // objects.popSilently();
         for (final Runnable runnable : validationList) {
             runnable.run();
         }
