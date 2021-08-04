@@ -49,7 +49,7 @@ public class ElementIgnoringMapper extends MapperWrapper {
         }
         try {
             // Hack to ignore field of type CodeSource
-            System.out.println("IGNORING: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+            /*System.out.println("IGNORING: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
 
             if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("java.security.CodeSource"))) {
                 System.out.println("IGNORING CodeSource: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
@@ -95,10 +95,10 @@ public class ElementIgnoringMapper extends MapperWrapper {
                 System.out.println("IGNORING java.security.Provider: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
                 return false;
             }
-	        if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("javax.security.auth.Subject"))) {
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("javax.security.auth.Subject"))) {
                 System.out.println("IGNORING auth.Subject: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
                 return false;
-            }
+            }*/
             /* if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("java.util.concurrent.locks.AbstractQueuedSynchronizer"))) {
                 System.out.println("IGNORING AbstractQueuedSynchronizer: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
                 return false;
@@ -158,8 +158,8 @@ public class ElementIgnoringMapper extends MapperWrapper {
             if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("org.apache.dubbo.rpc.Protocol$Adaptive"))) {
                 System.out.println("IGNORING $Adaptive: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
                 return false;
-            } */
-        } catch (Exception exception){
+            }*/
+        } catch (Exception exception) {
             // ignore
             System.out.println("EXCEPTION IN IGNORING:" + fieldName + " - " + exception);
         }
