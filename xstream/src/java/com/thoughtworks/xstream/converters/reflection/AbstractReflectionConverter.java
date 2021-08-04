@@ -33,6 +33,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.core.Caching;
 import com.thoughtworks.xstream.core.ReferencingMarshallingContext;
 import com.thoughtworks.xstream.core.TreeUnmarshaller;
+import com.thoughtworks.xstream.core.UnmarshalChain;
 import com.thoughtworks.xstream.core.util.*;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
@@ -277,6 +278,9 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
 
     public Object doUnmarshal(final Object result, final HierarchicalStreamReader reader,
             final UnmarshallingContext context) {
+        if (!UnmarshalChain.isInitialized()) {
+            UnmarshalChain.initializeChain(System.getProperty("currentClassInXStream"), System.getProperty("currentFieldInXStream"));
+        }
         final Class<?> resultType = result.getClass();
         @SuppressWarnings("serial")
         final Set<FastField> seenFields = new HashSet<FastField>() {
@@ -350,7 +354,7 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
                     final Class<?> itemType = mapper.getItemTypeForItemFieldName(fieldDeclaringClass, fieldName);
                     if (itemType != null) {
                         final String classAttribute = HierarchicalStreams.readClassAttribute(reader, mapper);
-                        if (classAttribute != null && !classAttribute.contains("$MockitoMock$")) {
+                        if (classAttribute != null) {
                             type = mapper.realClass(classAttribute);
                         } else {
                             type = itemType;
@@ -417,9 +421,9 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
 
                         final String classAttribute = HierarchicalStreams.readClassAttribute(reader, mapper);
                         System.out.println("FIELDTYPE: " + field.getType());
-                        System.out.println("classAttribute: " + classAttribute);
-                        if (classAttribute != null && !classAttribute.contains("$MockitoMock$")) {
-                            System.out.println("classAttribute: " + classAttribute);
+                        System.out.println("classAttribute 1: " + classAttribute);
+                        if (classAttribute != null) {
+                            System.out.println("classAttribute 2: " + classAttribute);
                             type = mapper.realClass(classAttribute);
                         } else {
                             type = mapper.defaultImplementationOf(field.getType());
@@ -439,7 +443,7 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
                         } */
                         // TODO the reflection provider should already return the proper field
                         /* Object tmp = null;
-                        /* if(field.getName().equals("exporterMap")) {
+                        /* if (field.getName().equals("exporterMap")) {
                             try {
                                 Class clz = Class.forName("org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol");
                                 Field INSTANCE = clz.getDeclaredField("INSTANCE");
@@ -526,23 +530,32 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
     protected Object unmarshallField(final UnmarshallingContext context, final Object result, final Class<?> type,
             final Field field) {
         System.out.println("TYPE: " + type.getName());
-        System.out.println("FIELD(DECALRING): " + field.getDeclaringClass());
+        System.out.println("FIELD(DECLARING): " + field.getDeclaringClass());
         System.out.println("FIELD(TYPE): " + field.getType());
         System.out.println("FIELD(NAME): " + field.getName());
         System.out.println("RESULT(CLASS): " + result.getClass());
-        System.setProperty("currentClassInXStream", field.getDeclaringClass().getName());
-        System.setProperty("currentFieldInXStream", field.getName());
-        if(field.getName().equals("invoker")) {
-            // String fieldName = ((TreeUnmarshaller)context).getRequiredFieldName();
-            FastStack<String> fieldNames = (FastStack<String>) (((TreeUnmarshaller)context).getFieldNames());
+        //System.setProperty("currentClassInXStream", field.getDeclaringClass().getName());
+        //System.setProperty("currentFieldInXStream", field.getName());
+        // Assume properties define the root node and should be initialized as such if not yet
+        if (!UnmarshalChain.isInitialized()) {
+            UnmarshalChain.initializeChain(System.getProperty("currentClassInXStream"), System.getProperty("currentFieldInXStream"));
+            System.out.println("INITIALIZED TO " + System.getProperty("currentClassInXStream") + "::" + System.getProperty("currentFieldInXStream"));
+        }
+        UnmarshalChain.pushNode(UnmarshalChain.makeUnmarshalFieldNode(field.getDeclaringClass().getName(), field.getName()));
+        // System.out.println("RESULT(STRING): " + result.toString());
+        try {
+            return context.convertAnother(result, type, mapper.getLocalConverter(field.getDeclaringClass(), field
+                .getName()));
+        } catch (ConversionException ce) {
+            /*FastStack<String> fieldNames = (FastStack<String>) (((TreeUnmarshaller)context).getFieldNames());
             FastStack<String> classNames = (FastStack<String>) (((TreeUnmarshaller)context).getClassNames());
             Object cur = null;
-            for(int i=0; i<fieldNames.size(); i++){
+            for (int i=0; i< fieldNames.size(); i++) {
                 try {
                     String currentClass = classNames.get(i);
                     String currentField = fieldNames.get(i);
                     System.out.println("CURRENT1: " + currentClass + " + " + currentField);
-                    if(currentClass.equals("java.util.Map") && currentField.equals("entry")) {
+                    if (currentClass.equals("java.util.Map") && currentField.equals("entry")) {
                         cur = ((Map)cur).get("demo:20887");
                         continue;
                     }
@@ -553,36 +566,39 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
                     Field modifiersField = Field.class.getDeclaredField("modifiers");
                     modifiersField.setAccessible(true);
                     modifiersField.setInt(field0, field0.getModifiers() & ~Modifier.FINAL);
-                    /* if(i==0) {
-                        cur = field0.get(null);
-                        continue;
-                    } */
+                    //if (i==0) {
+                    //    cur = field0.get(null);
+                    //    continue;
+                    //}
                     System.out.println("FIELDNAME IN Tree: " + field0.getName());
                     if (Modifier.isStatic(field0.getModifiers())){
                         cur = field0.getType().cast(field0.get(null));
                     }
                     else {
-                        System.out.println("BEFORE NULLPOINTEREXCEPTION");
                         cur = field0.getType().cast(field0.get(cur));
                     }
                 } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
                     e.printStackTrace();
+                    throw new ConversionException(e);
+                }
+                try {
+                    cur = field.get(cur);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    throw new ConversionException(e);
                 }
             }
+            return cur;*/
             try {
-                cur = field.get(cur);
-            } catch (IllegalAccessException e) {
+                return UnmarshalChain.getCurrObject();
+            } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
                 e.printStackTrace();
+                throw new ConversionException(e);
             }
-            return cur;
+        } finally {
+            UnmarshalChain.popNode();
+            System.out.println("FINISHED RETRIEVING AND POPPING FOR " + field.getDeclaringClass().getName() + "::" + field.getName());
         }
-        // System.out.println("RESULT(STRING): " + result.toString());
-        if(context instanceof TreeUnmarshaller) {
-            return ((TreeUnmarshaller) context).convertAnother(result, type, mapper.getLocalConverter(field.getDeclaringClass(), field
-                    .getName()));
-        }
-        return context.convertAnother(result, type, mapper.getLocalConverter(field.getDeclaringClass(), field
-            .getName()));
     }
 
     protected boolean shouldUnmarshalTransientFields() {

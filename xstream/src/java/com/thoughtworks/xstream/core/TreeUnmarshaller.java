@@ -103,7 +103,7 @@ public class TreeUnmarshaller implements UnmarshallingContext {
             Object cur = this.getRequiredObject();
             System.out.println("FIELDNAME IN Tree: " + field.getName());
             Object ob;
-            if(parent instanceof Map) {
+            if (parent instanceof Map) {
                 ob = converter.unmarshal(reader, this);
             }
             else if (Modifier.isStatic(field.getModifiers())){
@@ -114,18 +114,18 @@ public class TreeUnmarshaller implements UnmarshallingContext {
             }
             System.out.println("NEW OBJ" + ob.getClass());
             */
-            if(parent instanceof Map) {
+            /*if (parent instanceof Map) {
                 classNames.push("java.util.Map");
                 fieldNames.push("entry");
             }
-            else{
+            else {
                 classNames.push(currentClass);
                 fieldNames.push(currentField);
-            }
+            }*/
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
-        System.out.println("TREEUNMARSHALLER + TPYE(NAME): " + type.getName());
+        System.out.println("TREEUNMARSHALLER + TYPE(NAME): " + type.getName());
         // System.out.println("TREEUNMARSHALLER + OBJECT(CLASS): " + parent.getClass());
         try {
             return converter.unmarshal(reader, this);
@@ -137,9 +137,10 @@ public class TreeUnmarshaller implements UnmarshallingContext {
             addInformationTo(conversionException, type, converter, parent);
             throw conversionException;
         } finally {
-            types.popSilently();
-            classNames.popSilently();
-            fieldNames.popSilently();
+            //types.popSilently();
+            //classNames.popSilently();
+            //fieldNames.popSilently();
+            //if (pushed) { UnmarshalChain.popNode(); }
         }
     }
 

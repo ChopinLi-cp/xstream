@@ -17,8 +17,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.core.UnmarshalChain;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.Mapper;
@@ -115,8 +117,26 @@ public class MapConverter extends AbstractCollectionConverter {
     protected void putCurrentEntryIntoMap(final HierarchicalStreamReader reader, final UnmarshallingContext context,
             final Map<?, ?> map, final Map<?, ?> target) {
         final Object key = readCompleteItem(reader, context, map);
-        final Object value = readCompleteItem(reader, context, map);
-
+        UnmarshalChain.pushNode(UnmarshalChain.makeUnmarshalMapEntryNode(key)); // Try getting the key and putting it in the chain to map to the value
+        Object value = null;
+        int level = reader.getLevel();
+        try {
+            value = readCompleteItem(reader, context, map);
+        } catch (ConversionException ce) {
+            // If there is a problem getting the value from this map entry, use the value in the current heap
+            try {
+                value = UnmarshalChain.getCurrObject();
+                // Make sure level moves up to the proper location after this kind of exception
+                while (reader.getLevel() > level) {
+                    reader.moveUp();
+                }
+            } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+                e.printStackTrace();
+                throw new ConversionException(e);
+            }
+        } finally {
+            UnmarshalChain.popNode();
+        }
         @SuppressWarnings("unchecked")
         final Map<Object, Object> targetMap = (Map<Object, Object>)target;
         targetMap.put(key, value);
