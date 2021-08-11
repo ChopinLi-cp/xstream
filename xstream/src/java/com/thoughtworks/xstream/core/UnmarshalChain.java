@@ -13,6 +13,10 @@ public class UnmarshalChain {
         return !chain.isEmpty();
     }
 
+    public static void reset() {
+        chain = new LinkedList<>();
+    }
+
     // Initialize with the static root
     public static void initializeChain(String className, String fieldName) {
         chain = new LinkedList<>();
