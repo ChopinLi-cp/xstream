@@ -85,7 +85,11 @@ public class UnmarshalChain {
             } else if (node instanceof UnmarshalMapEntryNode) {
                 UnmarshalMapEntryNode mapEntryNode = (UnmarshalMapEntryNode)node;
                 try {
-                    curr = ((Map)curr).get(mapEntryNode.key);
+                    Map map = (Map)curr;
+                    if (!map.containsKey(mapEntryNode.key)) {
+                        throw new MapEntryMissingException();
+                    }
+                    curr = map.get(mapEntryNode.key);
                 } catch (Throwable t) {
                     throw t;
                 }
@@ -93,6 +97,9 @@ public class UnmarshalChain {
         }
 
         return curr;
+    }
+
+    public static class MapEntryMissingException extends RuntimeException {
     }
 }
 

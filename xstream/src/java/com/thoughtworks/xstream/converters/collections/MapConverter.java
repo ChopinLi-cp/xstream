@@ -126,15 +126,17 @@ public class MapConverter extends AbstractCollectionConverter {
             // If there is a problem getting the value from this map entry, use the value in the current heap
             try {
                 value = UnmarshalChain.getCurrObject();
-                // Make sure level moves up to the proper location after this kind of exception
-                while (reader.getLevel() > level) {
-                    reader.moveUp();
-                }
+            } catch (UnmarshalChain.MapEntryMissingException e) {   // If map entry is simply missing in current heap, then return, don't update map
+                return;
             } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
                 e.printStackTrace();
                 throw new ConversionException(e);
             }
         } finally {
+            // Make sure level moves up to the proper location after this kind of exception
+            while (reader.getLevel() > level) {
+                reader.moveUp();
+            }
             UnmarshalChain.popNode();
         }
         @SuppressWarnings("unchecked")
