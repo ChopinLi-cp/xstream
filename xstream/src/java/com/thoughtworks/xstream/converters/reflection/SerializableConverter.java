@@ -262,7 +262,9 @@ public class SerializableConverter extends AbstractReflectionConverter {
                         @SuppressWarnings("resource")
                         final CustomObjectOutputStream objectOutputStream = CustomObjectOutputStream.getInstance(
                             context, callback);
-                        serializationMembers.callWriteObject(currentType, source, objectOutputStream);
+                        if (!source.getClass().getName().equals("sun.net.www.http.ClientVector") && !source.getClass().getName().equals("sun.net.www.http.KeepAliveCache")) {
+                            serializationMembers.callWriteObject(currentType, source, objectOutputStream);
+                        }
                         objectOutputStream.popCallback();
                         writer.endNode();
                     } else if (serializationMembers.supportsReadObject(currentType, false)) {
@@ -467,7 +469,9 @@ public class SerializableConverter extends AbstractReflectionConverter {
                     @SuppressWarnings("resource")
                     final CustomObjectInputStream objectInputStream = CustomObjectInputStream.getInstance(context,
                         callback, classLoaderReference);
-                    serializationMembers.callReadObject(currentType[0], result, objectInputStream);
+                    if (!result.getClass().getName().equals("sun.net.www.http.ClientVector") && !result.getClass().getName().equals("sun.net.www.http.KeepAliveCache")) {
+                        serializationMembers.callReadObject(currentType[0], result, objectInputStream);
+                    }
                     objectInputStream.popCallback();
                 } else {
                     try {

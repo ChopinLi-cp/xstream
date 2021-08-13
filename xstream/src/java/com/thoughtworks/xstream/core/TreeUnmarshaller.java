@@ -125,7 +125,7 @@ public class TreeUnmarshaller implements UnmarshallingContext {
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
-        System.out.println("TREEUNMARSHALLER + TYPE(NAME): " + type.getName());
+        // System.out.println("TREEUNMARSHALLER + TYPE(NAME): " + type.getName());
         // System.out.println("TREEUNMARSHALLER + OBJECT(CLASS): " + parent.getClass());
         try {
             return converter.unmarshal(reader, this);
@@ -137,7 +137,7 @@ public class TreeUnmarshaller implements UnmarshallingContext {
             addInformationTo(conversionException, type, converter, parent);
             throw conversionException;
         } finally {
-            //types.popSilently();
+            types.popSilently();
             //classNames.popSilently();
             //fieldNames.popSilently();
             //if (pushed) { UnmarshalChain.popNode(); }

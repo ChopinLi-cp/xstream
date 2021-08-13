@@ -547,6 +547,7 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
             return context.convertAnother(result, type, mapper.getLocalConverter(field.getDeclaringClass(), field
                 .getName()));
         } catch (ConversionException ce) {
+            ce.printStackTrace();
             /*FastStack<String> fieldNames = (FastStack<String>) (((TreeUnmarshaller)context).getFieldNames());
             FastStack<String> classNames = (FastStack<String>) (((TreeUnmarshaller)context).getClassNames());
             Object cur = null;
@@ -590,6 +591,7 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
             }
             return cur;*/
             try {
+                System.out.println("UNMARSHALCHAIN REACHES HERE");
                 return UnmarshalChain.getCurrObject();
             } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
                 e.printStackTrace();
