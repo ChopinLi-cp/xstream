@@ -262,7 +262,9 @@ public class SerializableConverter extends AbstractReflectionConverter {
                         @SuppressWarnings("resource")
                         final CustomObjectOutputStream objectOutputStream = CustomObjectOutputStream.getInstance(
                             context, callback);
-                        if (!source.getClass().getName().equals("sun.net.www.http.ClientVector") && !source.getClass().getName().equals("sun.net.www.http.KeepAliveCache")) {
+                        if (!source.getClass().getName().equals("sun.net.www.http.ClientVector")
+                            && !source.getClass().getName().equals("sun.net.www.http.KeepAliveCache")
+                            && !source.getClass().getName().equals("java.util.Collections$SynchronizedList")) {
                             serializationMembers.callWriteObject(currentType, source, objectOutputStream);
                         }
                         objectOutputStream.popCallback();

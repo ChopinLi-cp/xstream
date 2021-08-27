@@ -905,7 +905,7 @@ public class XStream {
         registerConverter(new SingletonMapConverter(mapper), PRIORITY_NORMAL);
         registerConverter(new PropertiesConverter(), PRIORITY_NORMAL);
         registerConverter((Converter)new EncodedByteArrayConverter(), PRIORITY_NORMAL);
-        registerConverter(new EnumConverter(), PRIORITY_NORMAL);
+        registerConverter(new EnumConverter(mapper, reflectionProvider), PRIORITY_NORMAL);
         registerConverter(new EnumSetConverter(mapper), PRIORITY_NORMAL);
         registerConverter(new EnumMapConverter(mapper), PRIORITY_NORMAL);
 

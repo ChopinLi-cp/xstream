@@ -15,9 +15,12 @@ package com.thoughtworks.xstream.converters.enums;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.converters.reflection.AbstractReflectionConverter;
+import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.EnumMapper;
+import com.thoughtworks.xstream.mapper.Mapper;
 
 
 /**
@@ -29,14 +32,18 @@ import com.thoughtworks.xstream.mapper.EnumMapper;
  * @author Eric Snell
  * @author Bryan Coleman
  */
-public class EnumConverter implements Converter {
+public class EnumConverter extends AbstractReflectionConverter {
+
+    public EnumConverter(Mapper mapper, ReflectionProvider reflectionProvider) {
+        super(mapper, reflectionProvider);
+    }
 
     @Override
     public boolean canConvert(final Class<?> type) {
         return type != null && type.isEnum() || Enum.class.isAssignableFrom(type);
     }
 
-    @Override
+    /* @Override
     public void marshal(final Object source, final HierarchicalStreamWriter writer, final MarshallingContext context) {
         writer.setValue(((Enum<?>)source).name());
     }
@@ -64,6 +71,6 @@ public class EnumConverter implements Converter {
             // all else failed
             throw e;
         }
-    }
+    } */
 
 }

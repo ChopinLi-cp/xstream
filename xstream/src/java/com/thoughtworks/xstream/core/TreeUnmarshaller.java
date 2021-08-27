@@ -59,7 +59,22 @@ public class TreeUnmarshaller implements UnmarshallingContext {
     @Override
     public Object convertAnother(final Object parent, Class<?> type, Converter converter) {
         type = mapper.defaultImplementationOf(type);
+        // System.out.println("type.getName(): " + type.getName());
         if (converter == null) {
+            /* if(type.getName().equals("jdk.internal.misc.InnocuousThread")) {
+                try{
+                    Class clz = Class.forName("jdk.internal.misc.InnocuousThread");
+                    Field field = clz.getDeclaredField("UNSAFE");
+                    field.setAccessible(true);
+                    Field modifiersField = Field.class.getDeclaredField("modifiers");
+                    modifiersField.setAccessible(true);
+                    modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+                }
+                catch(Exception e) {
+                    System.out.println("exception in setting " +
+                            "field(UNSAFE) with reflection: " + e);
+                }
+            } */
             converter = converterLookup.lookupConverterForType(type);
         } else {
             if (!converter.canConvert(type)) {

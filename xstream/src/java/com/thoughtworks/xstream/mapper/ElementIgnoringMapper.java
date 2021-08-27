@@ -99,6 +99,18 @@ public class ElementIgnoringMapper extends MapperWrapper {
                 System.out.println("IGNORING auth.Subject: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
                 return false;
             }
+            if (definedIn.getDeclaredField(fieldName).getType().isAssignableFrom(Class.forName("java.io.FileCleanable"))) {
+                System.out.println("IGNORING FileCleanable: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("java.util.concurrent.atomic.AtomicReference"))) {
+                System.out.println("IGNORING AtomicReference: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
+            if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("jdk.internal.misc.Unsafe"))) {
+                System.out.println("IGNORING Unsafe: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
+                return false;
+            }
             /* if (definedIn.getDeclaredField(fieldName).getType().equals(Class.forName("java.util.concurrent.locks.AbstractQueuedSynchronizer"))) {
                 System.out.println("IGNORING AbstractQueuedSynchronizer: " + definedIn.getDeclaredField(fieldName).getType() + " - " + fieldName);
                 return false;
@@ -161,7 +173,7 @@ public class ElementIgnoringMapper extends MapperWrapper {
             }*/
         } catch (Exception exception) {
             // ignore
-            System.out.println("EXCEPTION IN IGNORING:" + fieldName + " - " + exception);
+            // System.out.println("EXCEPTION IN IGNORING:" + fieldName + " - " + exception);
         }
         return super.shouldSerializeMember(definedIn, fieldName);
     }

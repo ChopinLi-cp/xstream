@@ -95,6 +95,9 @@ public class SerializationMembers implements Caching {
             final Class<? extends Object> objectType = object.getClass();
             final Method writeReplaceMethod = getRRMethod(objectType, "writeReplace");
             if (writeReplaceMethod != null) {
+                if(objectType.getName().equals("org.mockito.internal.invocation.mockref.MockWeakReference")) {
+                    return object;
+                }
                 ErrorWritingException ex = null;
                 try {
                     Object replaced = writeReplaceMethod.invoke(object);

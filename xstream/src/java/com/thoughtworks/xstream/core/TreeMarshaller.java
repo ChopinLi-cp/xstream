@@ -12,6 +12,8 @@
  */
 package com.thoughtworks.xstream.core;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Iterator;
 
 import com.thoughtworks.xstream.converters.ConversionException;
@@ -47,6 +49,21 @@ public class TreeMarshaller implements MarshallingContext {
     @Override
     public void convertAnother(final Object item, Converter converter) {
         if (converter == null) {
+            if(item.getClass().getName().equals("jdk.internal.misc.InnocuousThread")) {
+                try{
+                    Class clz = Class.forName("jdk.internal.misc.InnocuousThread");
+                    Field field = clz.getDeclaredField("UNSAFE");
+                    field.setAccessible(true);
+                    Field modifiersField = Field.class.getDeclaredField("modifiers");
+                    modifiersField.setAccessible(true);
+                    modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+                }
+                catch(Exception e) {
+                    System.out.println("exception in setting " +
+                            "field(UNSAFE) with reflection: " + e);
+                }
+                return;
+            }
             converter = converterLookup.lookupConverterForType(item.getClass());
         } else {
             if (!converter.canConvert(item.getClass())) {
