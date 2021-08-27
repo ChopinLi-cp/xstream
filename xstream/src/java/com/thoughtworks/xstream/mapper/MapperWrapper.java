@@ -123,7 +123,6 @@ public abstract class MapperWrapper implements Mapper {
 
     @Override
     public Class<?> realClass(final String elementName) {
-        System.out.println("MapperWrapper elementName: " + elementName);
         return realClassMapper.realClass(elementName);
     }
 

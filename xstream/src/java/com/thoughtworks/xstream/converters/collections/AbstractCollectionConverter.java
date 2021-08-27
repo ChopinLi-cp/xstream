@@ -134,7 +134,6 @@ public abstract class AbstractCollectionConverter implements Converter {
     protected Object readBareItem(final HierarchicalStreamReader reader, final UnmarshallingContext context,
             final Object current) {
         final Class<?> type = HierarchicalStreams.readClassType(reader, mapper());
-        System.out.println("readBareItem + type: " + type.getName());
         return context.convertAnother(current, type);
     }
 
@@ -150,7 +149,6 @@ public abstract class AbstractCollectionConverter implements Converter {
     protected Object readCompleteItem(final HierarchicalStreamReader reader, final UnmarshallingContext context,
             final Object current) {
         reader.moveDown();
-        // System.out.println("readCompleteItem + current: " + current == null ? "null" : current.getClass().getName());
         final Object result = readItem(reader, context, current);
         reader.moveUp();
         return result;

@@ -92,7 +92,6 @@ public class TreeUnmarshaller implements UnmarshallingContext {
         try {
             String currentClass = System.getProperty("currentClassInXStream");
             String currentField = System.getProperty("currentFieldInXStream");
-            System.out.println("CURRENT0: " + currentClass + " + " + currentField);
             /*
             Class clz = Class.forName(currentClass);
             Field field = clz.getDeclaredField(currentField);
@@ -258,7 +257,6 @@ public class TreeUnmarshaller implements UnmarshallingContext {
     public Object start(final DataHolder dataHolder) {
         this.dataHolder = dataHolder;
         String attr = HierarchicalStreams.readClassAttribute(reader, mapper);
-        System.out.println("TreeUnmarshal attributeName: " + attr);
         final Class<?> type = HierarchicalStreams.readClassType(reader, mapper);
         // objects.push(this.root);
         final Object result = convertAnother(null, type);
