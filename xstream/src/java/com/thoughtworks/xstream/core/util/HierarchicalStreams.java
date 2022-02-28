@@ -37,7 +37,6 @@ public class HierarchicalStreams {
     public static String readClassAttribute(final HierarchicalStreamReader reader, final Mapper mapper) {
 
         String attributeName = mapper.aliasForSystemAttribute("resolves-to");
-        System.out.println("HierarchicalStreams attributeName: " + attributeName);
         String classAttribute = attributeName == null ? null : reader.getAttribute(attributeName);
         if (classAttribute == null) {
             attributeName = mapper.aliasForSystemAttribute("class");

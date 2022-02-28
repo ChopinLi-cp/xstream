@@ -268,11 +268,8 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
 
     @Override
     public Object unmarshal(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
-        System.out.println("begin to unmarshall: 0");
         Object result = instantiateNewInstance(reader, context);
-        System.out.println("begin to unmarshall: 1");
         result = doUnmarshal(result, reader, context);
-        System.out.println("begin to unmarshall: 100");
         return serializationMembers.callReadResolve(result);
     }
 
@@ -292,15 +289,13 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
                 return true;
             }
         };
-        System.out.println("begin to unmarshall(resultType): " + resultType.getName());
+
         // process attributes before recursing into child elements.
         final Iterator<String> it = reader.getAttributeNames();
         while (it.hasNext()) {
             final String attrAlias = it.next();
-            System.out.println("begin to unmarshall(attrAlias): " + attrAlias);
             // TODO: realMember should return FastField
             final String attrName = mapper.realMember(resultType, mapper.attributeForAlias(attrAlias));
-            System.out.println("begin to unmarshall(attrName): " + attrName);
             final Field field = reflectionProvider.getFieldOrNull(resultType, attrName);
             if (field != null && shouldUnmarshalField(field)) {
                 final Class<?> classDefiningField = field.getDeclaringClass();
@@ -310,13 +305,10 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
 
                 // we need a converter that produces a string representation only
                 Class<?> type = field.getType();
-                System.out.println("begin to unmarshall(fieldType): " + type.getName());
                 final SingleValueConverter converter = mapper.getConverterFromAttribute(classDefiningField, attrName,
                     type);
                 if (converter != null) {
-                    System.out.println("CONVERTER not null!");
                     final Object value = converter.fromString(reader.getAttribute(attrAlias));
-                    System.out.println("begin to unmarshall(value): " + value.getClass());
                     if (type.isPrimitive()) {
                         type = Primitives.box(type);
                     }
@@ -363,9 +355,7 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
                         // it is not an alias ... do we have an element of an implicit
                         // collection based on type only?
                         try {
-                            System.out.println("ORIGINALNODENAME: " + originalNodeName);
                             type = mapper.realClass(originalNodeName);
-                            System.out.println("TYPE0: " + type.getName());
                             implicitFieldName = mapper.getFieldNameForItemTypeAndName(fieldDeclaringClass, type,
                                 originalNodeName);
                         } catch (final CannotResolveClassException e) {
@@ -420,46 +410,12 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
                                 && mapper.shouldSerializeMember(field.getDeclaringClass(), fieldName))) {
 
                         final String classAttribute = HierarchicalStreams.readClassAttribute(reader, mapper);
-                        System.out.println("FIELDTYPE: " + field.getType());
-                        System.out.println("classAttribute 1: " + classAttribute);
                         if (classAttribute != null) {
-                            System.out.println("classAttribute 2: " + classAttribute);
                             type = mapper.realClass(classAttribute);
                         } else {
                             type = mapper.defaultImplementationOf(field.getType());
                         }
-                        System.out.println("context.currentObject: " + context.currentObject());
-                        /* if(classAttribute.contains("$MockitoMock$")) {
-                            if(context instanceof TreeUnmarshaller) {
-                                FastStack<Class<?>> types = ((TreeUnmarshaller) context).getTypes();
-                                int size = types.size();
-                                for(int i=0; i<size-1; i++) {
-                                    Class cur = getElement(types, i);
-
-                                }
-                            }
-                            System.out.println("context.currentObject: " + context.currentObject());
-                            // value = context.currentObject();
-                        } */
                         // TODO the reflection provider should already return the proper field
-                        /* Object tmp = null;
-                        /* if (field.getName().equals("exporterMap")) {
-                            try {
-                                Class clz = Class.forName("org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol");
-                                Field INSTANCE = clz.getDeclaredField("INSTANCE");
-                                Object ob_INS = INSTANCE.get(null);
-                                // Class dubbo = Class.forName("org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol");
-                                Field exporterMap = clz.getDeclaredField("exporterMap");
-                                Object ob_exp = exporterMap.get(ob_INS);
-                                tmp = ob_exp;
-
-                            } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        else {
-                            tmp = unmarshallField(context, result, type, field);
-                        } */
                         value = unmarshallField(context, result, type, field);
                         final Class<?> definedType = field.getType();
                         if (!definedType.isPrimitive()) {
@@ -475,7 +431,6 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
                 type = implicitCollectionMapping.getItemType();
                 if (type == null) {
                     final String classAttribute = HierarchicalStreams.readClassAttribute(reader, mapper);
-                    System.out.println("classAttribute: " + classAttribute);
                     type = mapper.realClass(classAttribute != null ? classAttribute : originalNodeName);
                 }
                 value = context.convertAnother(result, type);
@@ -529,69 +484,18 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
 
     protected Object unmarshallField(final UnmarshallingContext context, final Object result, final Class<?> type,
             final Field field) {
-        System.out.println("TYPE: " + type.getName());
-        System.out.println("FIELD(DECLARING): " + field.getDeclaringClass());
-        System.out.println("FIELD(TYPE): " + field.getType());
-        System.out.println("FIELD(NAME): " + field.getName());
-        System.out.println("RESULT(CLASS): " + result.getClass());
-        //System.setProperty("currentClassInXStream", field.getDeclaringClass().getName());
-        //System.setProperty("currentFieldInXStream", field.getName());
         // Assume properties define the root node and should be initialized as such if not yet
         if (!UnmarshalChain.isInitialized()) {
             UnmarshalChain.initializeChain(System.getProperty("currentClassInXStream"), System.getProperty("currentFieldInXStream"));
             System.out.println("INITIALIZED TO " + System.getProperty("currentClassInXStream") + "::" + System.getProperty("currentFieldInXStream"));
         }
         UnmarshalChain.pushNode(UnmarshalChain.makeUnmarshalFieldNode(field.getDeclaringClass().getName(), field.getName()));
-        // System.out.println("RESULT(STRING): " + result.toString());
         try {
             return context.convertAnother(result, type, mapper.getLocalConverter(field.getDeclaringClass(), field
                 .getName()));
         } catch (ConversionException ce) {
             ce.printStackTrace();
-            /*FastStack<String> fieldNames = (FastStack<String>) (((TreeUnmarshaller)context).getFieldNames());
-            FastStack<String> classNames = (FastStack<String>) (((TreeUnmarshaller)context).getClassNames());
-            Object cur = null;
-            for (int i=0; i< fieldNames.size(); i++) {
-                try {
-                    String currentClass = classNames.get(i);
-                    String currentField = fieldNames.get(i);
-                    System.out.println("CURRENT1: " + currentClass + " + " + currentField);
-                    if (currentClass.equals("java.util.Map") && currentField.equals("entry")) {
-                        cur = ((Map)cur).get("demo:20887");
-                        continue;
-                    }
-                    System.out.println("CURRENT1: " + currentClass + " + " + currentField);
-                    Class clz = Class.forName(currentClass);
-                    Field field0 = clz.getDeclaredField(currentField);
-                    field0.setAccessible(true);
-                    Field modifiersField = Field.class.getDeclaredField("modifiers");
-                    modifiersField.setAccessible(true);
-                    modifiersField.setInt(field0, field0.getModifiers() & ~Modifier.FINAL);
-                    //if (i==0) {
-                    //    cur = field0.get(null);
-                    //    continue;
-                    //}
-                    System.out.println("FIELDNAME IN Tree: " + field0.getName());
-                    if (Modifier.isStatic(field0.getModifiers())){
-                        cur = field0.getType().cast(field0.get(null));
-                    }
-                    else {
-                        cur = field0.getType().cast(field0.get(cur));
-                    }
-                } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
-                    e.printStackTrace();
-                    throw new ConversionException(e);
-                }
-                try {
-                    cur = field.get(cur);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                    throw new ConversionException(e);
-                }
-            }
-            return cur;*/
             try {
-                System.out.println("UNMARSHALCHAIN REACHES HERE");
                 return UnmarshalChain.getCurrObject();
             } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
                 e.printStackTrace();
@@ -669,18 +573,14 @@ public abstract class AbstractReflectionConverter implements Converter, Caching 
 
     private Class<?> readDeclaringClass(final HierarchicalStreamReader reader) {
         final String attributeName = mapper.aliasForSystemAttribute("defined-in");
-        System.out.println("readDeclaringClass attributeName: " + attributeName);
         final String definedIn = attributeName == null ? null : reader.getAttribute(attributeName);
         return definedIn == null ? null : mapper.realClass(definedIn);
     }
 
     protected Object instantiateNewInstance(final HierarchicalStreamReader reader, final UnmarshallingContext context) {
         final String attributeName = mapper.aliasForSystemAttribute("resolves-to");
-        System.out.println("attributeName: " + attributeName);
         final String readResolveValue = attributeName == null ? null : reader.getAttribute(attributeName);
-        System.out.println("readResolveValue: " + readResolveValue);
         final Object currentObject = context.currentObject();
-        System.out.println("context.requiredType: " + context.getRequiredType());
         if (currentObject != null) {
             return currentObject;
         } else if (readResolveValue != null) {

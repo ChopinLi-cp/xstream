@@ -66,9 +66,7 @@ public class DefaultMapper implements Mapper {
     @Override
     public Class<?> realClass(final String elementName) {
         final Class<?> resultingClass = Primitives.primitiveType(elementName);
-        System.out.println("ELEMENTNAME: " + elementName);
         if (resultingClass != null) {
-            System.out.println("resultingClass: " + resultingClass);
             return resultingClass;
         }
         try {
